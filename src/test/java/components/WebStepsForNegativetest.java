@@ -4,19 +4,7 @@ import io.qameta.allure.Step;
 
 public class WebStepsForNegativetest {
    CssElements cssElementsAndVariables =new CssElements();
- /*   Faker faker = new Faker();
-   public String userName = faker.name().firstName(),
-            userLastName = faker.name().lastName(),
-            userEmail = faker.internet().emailAddress(),
-            currentAddress = faker.address().streetAddress(),
-            phoneNumber = faker.phoneNumber().subscriberNumber(10),
-            photo = "1.png",
-            genderMale ="Male",
-            genderFemale = "Female",
-            gendrOther = "Other",
-            hobbyMusic = "Music",
-            hobbySports = "Sports";*/
-    Variables variables = new Variables();
+   Variables variables = new Variables();
 
  @Step("open main page")
  public  void openMainpage(){cssElementsAndVariables.openPage();

@@ -14,6 +14,7 @@ public class Variables {
             genderFemale = "Female",
             gendrOther = "Other",
             hobbyMusic = "Music",
+            readingHobby= "Reading",
             hobbySports = "Sports";
 
 }
