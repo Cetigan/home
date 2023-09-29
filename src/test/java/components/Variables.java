@@ -16,5 +16,4 @@ public class Variables {
             hobbyMusic = "Music",
             readingHobby= "Reading",
             hobbySports = "Sports";
-
 }

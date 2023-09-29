@@ -3,12 +3,10 @@ package components;
 import io.qameta.allure.Step;
 
 public class WebStepsForNegativetest {
-   CssElements cssElementsAndVariables =new CssElements();
+    CssElements cssElementsAndVariables =new CssElements();
    Variables variables = new Variables();
-
- @Step("open main page")
- public  void openMainpage(){cssElementsAndVariables.openPage();
- }
+   @Step("open main page")
+   public  void openMainpage(){cssElementsAndVariables.openPage();}
     @Step("set the userName")
     public void userName(){cssElementsAndVariables.setFirstName(variables.userName);}
     @Step("set the userLastName")
@@ -55,9 +53,6 @@ public class WebStepsForNegativetest {
    public void checkCurrentAddress(){cssElementsAndVariables.checkRegistrationForm("Address",variables.currentAddress);}
    @Step("check- State and City-Haryana Karnal")
    public void checkState(){cssElementsAndVariables.checkRegistrationForm("State and City","Haryana Karnal");}
-
-
-
 }
 
 

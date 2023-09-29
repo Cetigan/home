@@ -18,8 +18,7 @@ import static helper.AttachmentsHelper.*;
 @Link(value = "site",url = "https://demoqa.com/automation-practice-form")
 @Tag("negative")
 public class NegativeTest extends TestBase {
-
-    @Test
+ @Test
     public  void oldschool(){
      Configuration.browserSize ="800x600";
         // When the browser size is greater than 800px the "Submite"button is not clickable
@@ -37,6 +36,7 @@ public class NegativeTest extends TestBase {
         steps.state();
         steps.city();
         steps.submit();
+        //verification
         steps.checkName();
         steps.checkUserEmail();
         steps.checkPhoneNumber();
@@ -49,7 +49,5 @@ public class NegativeTest extends TestBase {
         steps.checkState();
         screenshotAs("End of test screen");
         pageSource();
-
-    }
-
+ }
 }
