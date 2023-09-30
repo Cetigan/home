@@ -52,7 +52,8 @@ public class WebStepsForNegativetest {
    @Step("check- currentAddress")
    public void checkCurrentAddress(){cssElementsAndVariables.checkRegistrationForm("Address",variables.currentAddress);}
    @Step("check- State and City-Haryana Karnal")
-   public void checkState(){cssElementsAndVariables.checkRegistrationForm("State and City","Haryana Karnal");}
+   public void checkState(){cssElementsAndVariables.checkRegistrationForm("State and City","Yaryana Karnal");}
+    //-I made error to fail this test--"State and City","Haryana Karnal" (correct State should be Haryana)
 }
 
 

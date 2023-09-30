@@ -20,7 +20,7 @@ import static helper.AttachmentsHelper.*;
 public class NegativeTest extends TestBase {
  @Test
     public  void oldschool(){
-     Configuration.browserSize ="800x600";
+
         // When the browser size is greater than 800px the "Submite"button is not clickable
        steps.openMainpage();
         steps.userName();

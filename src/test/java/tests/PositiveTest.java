@@ -10,7 +10,6 @@ import io.qameta.allure.SeverityLevel;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
 import static helper.AttachmentsHelper.*;
 import static io.qameta.allure.Allure.step;
 
@@ -27,7 +26,6 @@ public class PositiveTest extends TestBase {
 
         step("open the main page",()->{
             cssElements.openPage();});
-
         step("set the userName",()->{
             cssElements.setFirstName(variables.userName);
         });
