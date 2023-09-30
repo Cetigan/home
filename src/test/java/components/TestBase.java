@@ -16,15 +16,15 @@ public class TestBase {
 
     @BeforeAll
     static void conditions(){
-        Configuration.browserSize ="300x800";
-        Configuration.browser="chrome";
+    //    Configuration.browserSize ="300x800";
+     //   Configuration.browser="chrome";
 
-      /* Configuration.browserSize = System.getProperty("browserSize", "1920x1080");
+       Configuration.browserSize = System.getProperty("browserSize", "1920x1080");
         Configuration.browser = System.getProperty("browser", "chrome");
         Configuration.browserVersion = System.getProperty("browserVersion", "100.0");
         Configuration.remote = System.getProperty("remote", "https://user1:1234@selenoid.autotests.cloud/wd/hub");
        Configuration.timeout = 10000;
-        Configuration.baseUrl="https://demoqa.com/automation-practice-form";*/
+        Configuration.baseUrl="https://demoqa.com/automation-practice-form";
     }
    @BeforeEach
      void addlistener(){

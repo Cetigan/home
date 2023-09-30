@@ -52,7 +52,7 @@ public class WebStepsForNegativetest {
    @Step("check- currentAddress")
    public void checkCurrentAddress(){cssElementsAndVariables.checkRegistrationForm("Address",variables.currentAddress);}
    @Step("check- State and City-Haryana Karnal")
-   public void checkState(){cssElementsAndVariables.checkRegistrationForm("State and City","Haryana Karnal");}
+   public void checkState(){cssElementsAndVariables.checkRegistrationForm("State and City","Yaryana Karnal");}//State==Haryana
 }
 
 
