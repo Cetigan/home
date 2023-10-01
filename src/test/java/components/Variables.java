@@ -13,7 +13,19 @@ public class Variables {
             genderMale ="Male",
             genderFemale = "Female",
             gendrOther = "Other",
+            subjectEnglish="English",
             hobbyMusic = "Music",
             readingHobby= "Reading",
-            hobbySports = "Sports";
+            hobbySports = "Sports",
+            dateOfBirth ="30",
+            monthOfBirth="May",
+            yearOfBirth="1985",
+            stateHaryana="Haryana",
+            cityKarnel="Karnal";
+
+
+
+
+
+
 }

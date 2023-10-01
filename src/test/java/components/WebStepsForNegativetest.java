@@ -18,9 +18,9 @@ public class WebStepsForNegativetest {
     @Step("set phone number")
     public void phone(){cssElementsAndVariables.setPhoneNumber(variables.phoneNumber);}
     @Step("set BirthDay")
-    public void BirthDay(){cssElementsAndVariables.setBirthDay("30","May","1907");}
+    public void BirthDay(){cssElementsAndVariables.setBirthDay(variables.dateOfBirth, variables.monthOfBirth, variables.yearOfBirth);}
     @Step("set subject-English")
-    public void subject(){cssElementsAndVariables.setSubject("English");}
+    public void subject(){cssElementsAndVariables.setSubject(variables.subjectEnglish);}
     @Step("set hobby-music")
     public void hobby(){cssElementsAndVariables.setHobbies(variables.hobbyMusic);}
     @Step("set photo")
@@ -28,9 +28,9 @@ public class WebStepsForNegativetest {
     @Step("set adress")
     public void adress(){cssElementsAndVariables.setAdress(variables.currentAddress);}
     @Step("set state-Haryana")
-    public void state(){cssElementsAndVariables.setState("Haryana");}
+    public void state(){cssElementsAndVariables.setState(variables.stateHaryana);}
     @Step("set city-Karnel")
-    public void city(){cssElementsAndVariables.setCity("Karnal");}
+    public void city(){cssElementsAndVariables.setCity(variables.cityKarnel);}
     @Step("click-submit")
     public void submit(){cssElementsAndVariables.submit();}
    @Step("check- name+surname")
@@ -42,9 +42,9 @@ public class WebStepsForNegativetest {
    @Step("check- genderMale")
    public void checkGenderMale(){cssElementsAndVariables.checkRegistrationForm("Gender",variables.genderMale);}
    @Step("check- Date of Birth")
-   public void checkBirth(){cssElementsAndVariables.checkRegistrationForm("Date of Birth","30 May,1907");}
+   public void checkBirth(){cssElementsAndVariables.checkRegistrationForm("Date of Birth",variables.dateOfBirth+" "+variables.monthOfBirth+","+ variables.yearOfBirth);}
    @Step("check- Subjects-English")
-   public void checkEnglish(){cssElementsAndVariables.checkRegistrationForm("Subjects","English");}
+   public void checkEnglish(){cssElementsAndVariables.checkRegistrationForm("Subjects",variables.subjectEnglish);}
    @Step("check- Hobbies-Music")
    public void checkMusic(){cssElementsAndVariables.checkRegistrationForm("Hobbies",variables.hobbyMusic);}
    @Step("check- photo")
@@ -52,8 +52,8 @@ public class WebStepsForNegativetest {
    @Step("check- currentAddress")
    public void checkCurrentAddress(){cssElementsAndVariables.checkRegistrationForm("Address",variables.currentAddress);}
    @Step("check- State and City-Haryana Karnal")
-   public void checkState(){cssElementsAndVariables.checkRegistrationForm("State and City","Yaryana Karnal");}
-    //-I made error to fail this test--"State and City","Haryana Karnal" (correct State should be Haryana)
+   public void checkState(){cssElementsAndVariables.checkRegistrationForm("State and City",variables.stateHaryana+" 00"+variables.cityKarnel);}
+    //-I made error to fail this test-correct-----variables.stateHaryana+" "+variables.cityKarnel (space instead of 00)
 }
 
 

@@ -36,16 +36,16 @@ public class PositiveTest extends TestBase {
             cssElements.setEmail(variables.userEmail);
         });
         step("set male gender",()->{
-            cssElements.setGender(variables.genderMale);
+            cssElements.setGender(variables.genderFemale);
         });
         step("set phone number",()->{
             cssElements.setPhoneNumber(variables.phoneNumber);
         });
         step("set BirthDay",()->{
-            cssElements.setBirthDay("25","April","1985");
+            cssElements.setBirthDay(variables.dateOfBirth, variables.monthOfBirth, variables.yearOfBirth);
         });
         step("set subject-English",()->{
-            cssElements.setSubject("English");
+            cssElements.setSubject(variables.subjectEnglish);
         });
         step("set hobby-music",()->{
             cssElements.setHobbies(variables.hobbyMusic);
@@ -57,10 +57,10 @@ public class PositiveTest extends TestBase {
             cssElements.setAdress(variables.currentAddress);
         });
         step("set state-Haryana",()->{
-            cssElements.setState("Haryana");
+            cssElements.setState(variables.stateHaryana);
         });
         step("set city-Karnel",()->{
-            cssElements.setCity("Karnal");
+            cssElements.setCity(variables.cityKarnel);
         });
         step("click-submit",()->{
             cssElements.submit();
@@ -76,13 +76,13 @@ public class PositiveTest extends TestBase {
             cssElements.checkRegistrationForm("Mobile",variables.phoneNumber);
         });
         step("check- genderMale",()->{
-            cssElements.checkRegistrationForm("Gender",variables.genderMale);
+            cssElements.checkRegistrationForm("Gender",variables.genderFemale);
         });
         step("check- Date of Birth",()->{
-            cssElements.checkRegistrationForm("Date of Birth","25 April,1985");
+            cssElements.checkRegistrationForm("Date of Birth",variables.dateOfBirth+" "+variables.monthOfBirth+","+ variables.yearOfBirth);
         });
         step("check- Subjects-English",()->{
-            cssElements.checkRegistrationForm("Subjects","English");
+            cssElements.checkRegistrationForm("Subjects",variables.subjectEnglish);
         });
         step("check- Hobbies-Music",()->{
             cssElements.checkRegistrationForm("Hobbies",variables.hobbyMusic);
@@ -94,7 +94,7 @@ public class PositiveTest extends TestBase {
             cssElements.checkRegistrationForm("Address",variables.currentAddress);
         });
         step("check- State and City-Haryana Karnal",()->{
-            cssElements.checkRegistrationForm("State and City","Haryana Karnal");
+            cssElements.checkRegistrationForm("State and City",variables.stateHaryana+" "+variables.cityKarnel);
         });
         step("attached files",()->{
             screenshotAs("End of test screen");
