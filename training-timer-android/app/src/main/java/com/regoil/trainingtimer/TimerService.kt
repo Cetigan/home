@@ -5,13 +5,14 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
-import android.content.Context
 import android.content.Intent
 import android.media.AudioAttributes
 import android.media.AudioManager
-import android.media.SoundPool
+import android.media.MediaPlayer
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.os.PowerManager
 import android.os.SystemClock
 import android.os.VibrationEffect
@@ -71,16 +72,12 @@ class TimerService : Service() {
     private var warnedFiveMin = false
 
     private var wakeLock: PowerManager.WakeLock? = null
-    private lateinit var soundPool: SoundPool
-    private var whistleId = 0
-    private var hornId = 0
-    private var signalId = 0
-    private val loadedIds = mutableSetOf<Int>()
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private val players = java.util.Collections.synchronizedList(ArrayList<MediaPlayer>())
 
     override fun onCreate() {
         super.onCreate()
         createChannel()
-        setupSound()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -184,16 +181,19 @@ class TimerService : Service() {
     private fun finishWorkout() {
         phase = Phase.DONE
         publish()
-        // End of the whole workout: train horn + a firm vibration.
-        playHorn()
         vibrateDone()
         val n = buildNotification("Тренировка завершена!", "Отличная работа 💪", ongoing = false)
         (getSystemService(NotificationManager::class.java)).notify(NOTIF_ID, n)
         releaseWakeLock()
         loopJob?.cancel()
-        // Let the train horn finish before tearing down the sound engine and service.
+        // End of the whole workout: play the train sound fully, then stop the service.
+        playCue(R.raw.train_horn) {
+            stopForeground(STOP_FOREGROUND_DETACH)
+            stopSelf()
+        }
+        // Safety net in case playback completion never fires (max 30 s).
         scope.launch {
-            delay(3200)
+            delay(30_000)
             stopForeground(STOP_FOREGROUND_DETACH)
             stopSelf()
         }
@@ -223,6 +223,7 @@ class TimerService : Service() {
         TimerState.reset()
         releaseWakeLock()
         loopJob?.cancel()
+        releaseAllPlayers()
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
     }
@@ -245,27 +246,45 @@ class TimerService : Service() {
 
     // ---- Sound ---------------------------------------------------------------
 
-    private fun setupSound() {
-        val attrs = AudioAttributes.Builder()
-            .setUsage(AudioAttributes.USAGE_ALARM) // plays even in silent/vibrate & after a call
-            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-            .build()
-        soundPool = SoundPool.Builder().setMaxStreams(3).setAudioAttributes(attrs).build()
-        soundPool.setOnLoadCompleteListener { _, sampleId, status ->
-            if (status == 0) loadedIds.add(sampleId)
+    /**
+     * Plays a bundled sound to completion. Uses MediaPlayer (not SoundPool) so long
+     * clips — like the ~16 s train horn — are not truncated. [onDone] runs on the main
+     * thread when playback finishes. Created on the main looper so callbacks fire.
+     */
+    private fun playCue(resId: Int, onDone: (() -> Unit)? = null) {
+        mainHandler.post {
+            try {
+                val attrs = AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_ALARM) // plays even in silent/vibrate & after a call
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build()
+                val mp = MediaPlayer.create(this, resId, attrs, AudioManager.AUDIO_SESSION_ID_GENERATE)
+                if (mp == null) {
+                    onDone?.invoke(); return@post
+                }
+                players.add(mp)
+                mp.setOnCompletionListener {
+                    players.remove(it); it.release(); onDone?.invoke()
+                }
+                mp.setOnErrorListener { p, _, _ ->
+                    players.remove(p); p.release(); onDone?.invoke(); true
+                }
+                mp.start()
+            } catch (e: Exception) {
+                onDone?.invoke()
+            }
         }
-        whistleId = soundPool.load(this, R.raw.whistle, 1)
-        hornId = soundPool.load(this, R.raw.train_horn, 1)
-        signalId = soundPool.load(this, R.raw.signal_5min, 1)
     }
 
-    private fun play(id: Int) {
-        if (id in loadedIds) soundPool.play(id, 1f, 1f, 1, 0, 1f)
-    }
+    private fun playWhistle() = playCue(R.raw.whistle)   // end of a set (подход)
+    private fun playSignal() = playCue(R.raw.signal_5min) // 5 minutes before the end
 
-    private fun playWhistle() = play(whistleId)   // end of a set (подход)
-    private fun playHorn() = play(hornId)         // end of the whole workout
-    private fun playSignal() = play(signalId)     // 5 minutes before the end
+    private fun releaseAllPlayers() {
+        synchronized(players) {
+            players.forEach { runCatching { it.release() } }
+            players.clear()
+        }
+    }
 
     private fun vibrateDone() {
         val vib = getSystemService(Vibrator::class.java) ?: return
@@ -371,7 +390,7 @@ class TimerService : Service() {
     override fun onDestroy() {
         releaseWakeLock()
         scope.cancel()
-        soundPool.release()
+        releaseAllPlayers()
         super.onDestroy()
     }
 }
