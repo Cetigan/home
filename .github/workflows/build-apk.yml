@@ -36,7 +36,13 @@ jobs:
       - name: Build debug APK
         run: |
           chmod +x ./gradlew
-          ./gradlew assembleDebug --no-daemon --stacktrace
+          # Retry to survive transient dependency-download failures (e.g. Maven 403s).
+          for attempt in 1 2 3; do
+            echo "== build attempt $attempt =="
+            ./gradlew assembleDebug --no-daemon --stacktrace && break
+            [ "$attempt" = 3 ] && exit 1
+            sleep 15
+          done
 
       - name: Prepare APK
         run: cp app/build/outputs/apk/debug/app-debug.apk "$GITHUB_WORKSPACE/Timer-Natasha.apk"
