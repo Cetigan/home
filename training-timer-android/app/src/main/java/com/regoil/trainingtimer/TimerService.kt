@@ -48,6 +48,7 @@ class TimerService : Service() {
 
         private const val CHANNEL_ID = "timer_channel"
         private const val NOTIF_ID = 1
+        private const val FIVE_MIN = 5 * 60_000L
     }
 
     private val scope = CoroutineScope(Dispatchers.Default)
@@ -67,10 +68,14 @@ class TimerService : Service() {
     private var phaseRemainOnPause = 0L
     private var totalRemainOnPause = 0L
 
+    private var warnedFiveMin = false
+
     private var wakeLock: PowerManager.WakeLock? = null
     private lateinit var soundPool: SoundPool
     private var whistleId = 0
-    private var whistleLoaded = false
+    private var hornId = 0
+    private var signalId = 0
+    private val loadedIds = mutableSetOf<Int>()
 
     override fun onCreate() {
         super.onCreate()
@@ -108,6 +113,7 @@ class TimerService : Service() {
         setNumber = 1
         phaseEnd = minOf(now + config.workMillis, totalEnd)
         paused = false
+        warnedFiveMin = false
 
         playWhistle() // signal: start working
 
@@ -119,6 +125,13 @@ class TimerService : Service() {
         while (scope.isActive) {
             if (!paused) {
                 val now = SystemClock.elapsedRealtime()
+
+                // Warning signal 5 minutes before the whole workout ends.
+                val totalRemain = totalEnd - now
+                if (!warnedFiveMin && config.totalMillis > FIVE_MIN && totalRemain in 1..FIVE_MIN) {
+                    warnedFiveMin = true
+                    playSignal()
+                }
 
                 if (now >= phaseEnd) {
                     advancePhase(now)
@@ -171,16 +184,16 @@ class TimerService : Service() {
     private fun finishWorkout() {
         phase = Phase.DONE
         publish()
-        // Distinct end signal: the whistle sound is a double blast, plus a firm vibration.
-        playWhistle()
+        // End of the whole workout: train horn + a firm vibration.
+        playHorn()
         vibrateDone()
         val n = buildNotification("Тренировка завершена!", "Отличная работа 💪", ongoing = false)
         (getSystemService(NotificationManager::class.java)).notify(NOTIF_ID, n)
         releaseWakeLock()
         loopJob?.cancel()
-        // Let the final whistle finish before tearing down the sound engine and service.
+        // Let the train horn finish before tearing down the sound engine and service.
         scope.launch {
-            delay(1500)
+            delay(3200)
             stopForeground(STOP_FOREGROUND_DETACH)
             stopSelf()
         }
@@ -237,16 +250,22 @@ class TimerService : Service() {
             .setUsage(AudioAttributes.USAGE_ALARM) // plays even in silent/vibrate & after a call
             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
             .build()
-        soundPool = SoundPool.Builder().setMaxStreams(2).setAudioAttributes(attrs).build()
-        soundPool.setOnLoadCompleteListener { _, _, status -> whistleLoaded = status == 0 }
+        soundPool = SoundPool.Builder().setMaxStreams(3).setAudioAttributes(attrs).build()
+        soundPool.setOnLoadCompleteListener { _, sampleId, status ->
+            if (status == 0) loadedIds.add(sampleId)
+        }
         whistleId = soundPool.load(this, R.raw.whistle, 1)
+        hornId = soundPool.load(this, R.raw.train_horn, 1)
+        signalId = soundPool.load(this, R.raw.signal_5min, 1)
     }
 
-    private fun playWhistle() {
-        if (whistleLoaded) {
-            soundPool.play(whistleId, 1f, 1f, 1, 0, 1f)
-        }
+    private fun play(id: Int) {
+        if (id in loadedIds) soundPool.play(id, 1f, 1f, 1, 0, 1f)
     }
+
+    private fun playWhistle() = play(whistleId)   // end of a set (подход)
+    private fun playHorn() = play(hornId)         // end of the whole workout
+    private fun playSignal() = play(signalId)     // 5 minutes before the end
 
     private fun vibrateDone() {
         val vib = getSystemService(Vibrator::class.java) ?: return
