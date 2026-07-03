@@ -1,0 +1,15 @@
+# Android / Gradle build output
+build/
+.gradle/
+local.properties
+*.apk
+*.aab
+.cxx/
+
+# Keep the Gradle wrapper and project config tracked even though the
+# repository-root .gitignore excludes *.properties and gradle/ globally.
+!gradle/
+!gradle/wrapper/
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
+!gradle.properties
