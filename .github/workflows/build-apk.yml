@@ -1,0 +1,56 @@
+name: Build APK
+
+on:
+  push:
+    branches: [ "claude/android-audio-background-fix-gkstza" ]
+    paths:
+      - "training-timer-android/**"
+      - ".github/workflows/build-apk.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: training-timer-android
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install SDK packages
+        run: yes | sdkmanager "platforms;android-34" "build-tools;34.0.0" "platform-tools" >/dev/null || true
+
+      - name: Build debug APK
+        run: |
+          chmod +x ./gradlew
+          ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Prepare APK
+        run: cp app/build/outputs/apk/debug/app-debug.apk "$GITHUB_WORKSPACE/Timer-Natasha.apk"
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Timer-Natasha-apk
+          path: Timer-Natasha.apk
+
+      - name: Publish APK to a release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: apk-latest
+          name: "Таймер только для Наташи — APK"
+          body: "Автоматически собранный debug-APK. Скачайте Timer-Natasha.apk и установите на телефон (нужно разрешить установку из неизвестных источников)."
+          files: ${{ github.workspace }}/Timer-Natasha.apk
