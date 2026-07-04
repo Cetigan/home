@@ -46,6 +46,7 @@ class TimerService : Service() {
         const val EX_REST = "rest"
         const val EX_EX_BREAK = "ex_break"
         const val EX_USE_EX_BREAK = "use_ex_break"
+        const val EX_USE_WORK = "use_work"
 
         private const val CHANNEL_ID = "timer_channel"
         private const val NOTIF_ID = 1
@@ -96,7 +97,8 @@ class TimerService : Service() {
             workMillis = intent.getLongExtra(EX_WORK, 45_000L),
             restMillis = intent.getLongExtra(EX_REST, 75_000L),
             exerciseBreakMillis = intent.getLongExtra(EX_EX_BREAK, 2 * 60_000L),
-            useExerciseBreak = intent.getBooleanExtra(EX_USE_EX_BREAK, true)
+            useExerciseBreak = intent.getBooleanExtra(EX_USE_EX_BREAK, true),
+            useWork = intent.getBooleanExtra(EX_USE_WORK, true)
         )
 
         // Enter foreground immediately (must happen within a few seconds of start).
@@ -108,11 +110,16 @@ class TimerService : Service() {
         phase = Phase.WORK
         completedSets = 0
         setNumber = 1
-        phaseEnd = minOf(now + config.workMillis, totalEnd)
         paused = false
         warnedFiveMin = false
 
-        playWhistle() // signal: start working
+        if (config.useWork) {
+            phaseEnd = minOf(now + config.workMillis, totalEnd)
+            playWhistle() // signal: start working
+        } else {
+            // Workless mode: one continuous countdown, no per-set whistles.
+            phaseEnd = totalEnd
+        }
 
         loopJob?.cancel()
         loopJob = scope.launch { runLoop() }
@@ -239,7 +246,8 @@ class TimerService : Service() {
                 phase = phase,
                 phaseRemainingMs = phaseRemain,
                 totalRemainingMs = totalRemain,
-                setNumber = setNumber
+                setNumber = setNumber,
+                plain = !config.useWork
             )
         )
     }
@@ -326,7 +334,12 @@ class TimerService : Service() {
         getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
     }
 
-    private fun phaseTitle(): String = when (phase) {
+    private fun phaseTitle(): String = when {
+        !config.useWork -> "Тренировка идёт"
+        else -> phaseTitleForPhase()
+    }
+
+    private fun phaseTitleForPhase(): String = when (phase) {
         Phase.WORK -> "Работа — подход $setNumber"
         Phase.REST -> "Отдых между подходами"
         Phase.EXERCISE_BREAK -> "Перерыв между упражнениями"

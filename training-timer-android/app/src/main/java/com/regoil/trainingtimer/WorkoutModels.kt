@@ -19,6 +19,7 @@ data class WorkoutConfig(
     val restMillis: Long,           // Перерыв между подходами (rest between sets)
     val exerciseBreakMillis: Long,  // Перерыв между упражнениями (longer break)
     val useExerciseBreak: Boolean,
+    val useWork: Boolean = true,    // when false: no fixed work phases, plain countdown
     val setsPerExercise: Int = 4
 )
 
@@ -29,7 +30,8 @@ data class TimerUi(
     val phase: Phase = Phase.DONE,
     val phaseRemainingMs: Long = 0,
     val totalRemainingMs: Long = 0,
-    val setNumber: Int = 0
+    val setNumber: Int = 0,
+    val plain: Boolean = false      // workless mode: only the total countdown is meaningful
 )
 
 /** Single source of truth shared between the service and the Activity. */

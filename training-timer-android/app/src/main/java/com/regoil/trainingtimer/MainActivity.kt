@@ -36,6 +36,11 @@ class MainActivity : AppCompatActivity() {
             b.valueExBreak.isEnabled = checked
         }
 
+        b.checkWork.setOnCheckedChangeListener { _, checked ->
+            b.sliderWork.isEnabled = checked
+            b.valueWork.isEnabled = checked
+        }
+
         b.btnStart.setOnClickListener { startWorkout() }
         b.btnHelp.setOnClickListener { showHelp() }
         b.btnPauseResume.setOnClickListener { togglePause() }
@@ -66,6 +71,7 @@ class MainActivity : AppCompatActivity() {
             putExtra(TimerService.EX_REST, b.sliderRest.value.toLong() * 1_000L)
             putExtra(TimerService.EX_EX_BREAK, b.sliderExBreak.value.toLong() * 60_000L)
             putExtra(TimerService.EX_USE_EX_BREAK, b.checkExerciseBreak.isChecked)
+            putExtra(TimerService.EX_USE_WORK, b.checkWork.isChecked)
         }
         ContextCompat.startForegroundService(this, i)
     }
@@ -96,15 +102,27 @@ class MainActivity : AppCompatActivity() {
         b.runPanel.visibility = if (running) android.view.View.VISIBLE else android.view.View.GONE
         if (!running) return
 
-        b.phaseLabel.text = when (ui.phase) {
-            Phase.WORK -> "РАБОТА"
-            Phase.REST -> "ОТДЫХ"
-            Phase.EXERCISE_BREAK -> "ПЕРЕРЫВ"
-            Phase.DONE -> "ГОТОВО"
+        val gone = android.view.View.GONE
+        val visible = android.view.View.VISIBLE
+        if (ui.plain) {
+            // Workless mode: just show the total countdown.
+            b.phaseLabel.text = "ТРЕНИРОВКА"
+            b.phaseTime.text = format(ui.totalRemainingMs)
+            b.setLabel.visibility = gone
+            b.totalTime.visibility = gone
+        } else {
+            b.setLabel.visibility = visible
+            b.totalTime.visibility = visible
+            b.phaseLabel.text = when (ui.phase) {
+                Phase.WORK -> "РАБОТА"
+                Phase.REST -> "ОТДЫХ"
+                Phase.EXERCISE_BREAK -> "ПЕРЕРЫВ"
+                Phase.DONE -> "ГОТОВО"
+            }
+            b.phaseTime.text = format(ui.phaseRemainingMs)
+            b.totalTime.text = "Осталось всего: ${format(ui.totalRemainingMs)}"
+            b.setLabel.text = "Подход ${ui.setNumber}"
         }
-        b.phaseTime.text = format(ui.phaseRemainingMs)
-        b.totalTime.text = "Осталось всего: ${format(ui.totalRemainingMs)}"
-        b.setLabel.text = "Подход ${ui.setNumber}"
         b.btnPauseResume.text = if (ui.paused) "Продолжить" else "Пауза"
     }
 
@@ -123,6 +141,8 @@ class MainActivity : AppCompatActivity() {
                     "тренировку, длительность одного подхода и время, которое Вам будет " +
                     "достаточным для отдыха между подходами, а так же, при необходимости, " +
                     "время между упражнениями.\n\n" +
+                    "Галочка у «Длительность подхода» отключает подходы: тогда идёт " +
+                    "только общий отсчёт тренировки без свистков между подходами.\n\n" +
                     "Таймер продолжает работать и подаёт свисток, даже если свернуть " +
                     "приложение, выключить экран или во время звонка. По завершении " +
                     "тренировки прозвучит финальный свисток."
